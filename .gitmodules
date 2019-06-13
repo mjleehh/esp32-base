@@ -2,3 +2,6 @@
 	path = u8g2
 	url = https://github.com/olikraus/u8g2.git
 
+[submodule "liblvgl/lvgl"]
+	path = liblvgl/lvgl
+	url = https://github.com/littlevgl/lvgl.git
