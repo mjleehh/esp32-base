@@ -1,6 +1,6 @@
 #pragma once
 
-namespace mfl::mfl_color_display {
+namespace mfl::color_display {
 
 enum St7735Commands {
     NOP        = 0x00, // no operation
