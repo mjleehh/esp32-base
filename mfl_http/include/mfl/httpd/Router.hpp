@@ -18,29 +18,29 @@ namespace mfl::httpd {
 struct Router {
     Router();
 
-    template<typename T>
-    void post(const std::string& uriTemplate, const Handler<T>& handler) {
+    template<class F>
+    void post(const std::string& uriTemplate, F handler) {
         addHandler(http::Method::post, uriTemplate, handler);
     }
 
-    template<typename T>
-    void get(const std::string& uriTemplate, const Handler<T>& handler) {
+    template<class F>
+    void get(const std::string& uriTemplate, F handler) {
         addHandler(http::Method::get, uriTemplate, handler);
     }
 
-    template<typename F>
+    template<class F>
     void put(const std::string& uriTemplate, F handler) {
         addHandler(http::Method::put, uriTemplate, handler);
     }
 
-    template<typename T>
-    void del(const std::string& uriTemplate, const Handler<T>& handler) {
+    template<class F>
+    void del(const std::string& uriTemplate, F handler) {
         addHandler(http::Method::del, uriTemplate, handler);
     }
 
     void handle(Context<std::string>& context) const;
 private:
-    template<typename F>
+    template<class F>
     void addHandler(http::Method method, const std::string& uriTemplate, F handler) {
         addPlainHandler(method, uriTemplate, [handler](Context<std::string>& c){
             using RequestBodyT = typename getHandlerArgTypes<F>::request_body_type;
