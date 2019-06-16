@@ -3,13 +3,31 @@
 #include <driver/spi_common.h>
 #include <driver/spi_master.h>
 #include <cstring>
+#include <esp_log.h>
 
 namespace mfl::color_display {
+
+namespace {
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+// FIXME: quick hack, remove ASAP
+SpiBus* currentBus = nullptr;
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 SpiBus::SpiBus(const SpiBusConfig& config)
-    : commandPin_(config.commandPin), transmissionEndHandler_(config.transmissionEndHandler), transferInProgress_(false) {
+    : commandPin_(config.commandPin), transmissionEndHandler_(config.transmissionEndHandler), transferInProgress_(false)
+{
+    if (currentBus != nullptr) {
+        throw SpiBusConfigError("due to a bug in ESP IDF currently there can only be one SPI bus connected");
+    }
+    currentBus = this;
+
     if (config.clockPin == UNDEFINED_PIN) {
         throw SpiBusConfigError("clock pin is required in SPI config");
     }
@@ -31,6 +49,7 @@ SpiBus::SpiBus(const SpiBusConfig& config)
             .mode = 0,
             .clock_speed_hz = 40*1000*1000,
             .spics_io_num = config.chipSelectPin,
+            .flags = SPI_DEVICE_HALFDUPLEX,
             .queue_size = 1,
             .pre_cb = nullptr,
             .post_cb = transmissionEndIsr,
@@ -60,7 +79,6 @@ void SpiBus::sendCommand(uint8_t cmd) {
         // command mode
         gpio_set_level(commandPin_, 0);
     }
-
     sendRaw(&cmd, 1);
 }
 
@@ -71,7 +89,6 @@ void SpiBus::sendData(const uint8_t *data, uint16_t length) {
         // data mode
         gpio_set_level(commandPin_, 1);
     }
-
     sendRaw(data, length);
 }
 
@@ -84,11 +101,11 @@ void SpiBus::sendRaw(const uint8_t *data, uint16_t length) {
         // waiting
     }
 
-    spi_transaction_t transaction;
-    memset(&transaction, 0, sizeof(transaction));
-    transaction.length = length * 8; // transfer length in bits!
-    transaction.tx_buffer = data;
-    transaction.user = this;
+    spi_transaction_t transaction = {
+        .length = length * 8, // length in bits!
+        .user = this,
+        .tx_buffer = data,
+    };
     transferInProgress_ = true;
     spi_device_queue_trans(spi_, &transaction, portMAX_DELAY);
 }
@@ -105,8 +122,14 @@ void SpiBus::handleTransmissionEnd() {
 // ---------------------------------------------------------------------------------------------------------------------
 
 void IRAM_ATTR SpiBus::transmissionEndIsr(spi_transaction_t *transaction) {
-    if (transaction->user != nullptr) {
-        reinterpret_cast<SpiBus*>(transaction->user)->handleTransmissionEnd();
+// FIXME: the user property gets corrupted for some reason
+// FIXME: terrible terrible hack
+//    volatile auto user = reinterpret_cast<SpiBus*>(transaction->user);
+//    if (user != nullptr) {
+//        user->handleTransmissionEnd();
+//    }
+    if (currentBus != nullptr) {
+        currentBus->handleTransmissionEnd();
     }
 }
 

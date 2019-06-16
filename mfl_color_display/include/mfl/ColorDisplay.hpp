@@ -17,11 +17,13 @@ struct ColorDisplayError : std::logic_error {
 struct ColorDisplay {
     ColorDisplay(const color_display::ColorDisplayConfig& spiBusConfig);
 
+    void flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t* colorMap);
+    void fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color);
 private:
     static void flushCurrent(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t* colorMap);
     static void fillCurrent(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color);
-    void flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t* colorMap);
-    void fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color);
+
+    void setDrawWindow(int32_t x1, int32_t y1, int32_t x2, int32_t y2);
 
     static color_display::SpiBusConfig createBusConfig(const color_display::ColorDisplayConfig& config);
     static void handleEndTransmission();
