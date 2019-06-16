@@ -3,12 +3,9 @@
 #include <driver/gpio.h>
 #include <stdexcept>
 #include <driver/spi_master.h>
+#include <functional>
 
 namespace mfl::color_display {
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-using SpiBusHandler = void(*)();
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +25,7 @@ struct SpiBusConfig {
     gpio_num_t chipSelectPin = UNDEFINED_PIN;
     gpio_num_t commandPin = UNDEFINED_PIN;
     gpio_num_t dataReadPin = UNDEFINED_PIN;
-    SpiBusHandler transmissionEndHandler = nullptr;
+    std::function<void()> transmissionEndHandler = nullptr;
     uint16_t maxTransfertSize = 0;
 };
 
@@ -47,7 +44,7 @@ private:
 
     spi_device_handle_t spi_;
     gpio_num_t commandPin_;
-    SpiBusHandler transmissionEndHandler_;
+    std::function<void()> transmissionEndHandler_;
     volatile bool transferInProgress_;
 };
 

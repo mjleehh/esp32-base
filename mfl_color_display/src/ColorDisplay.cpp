@@ -17,10 +17,6 @@ namespace {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ColorDisplay* activeDisplay = nullptr;
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 typedef struct {
     uint8_t cmd;
     uint8_t data[16];
@@ -38,13 +34,8 @@ const char tag[] = "color display";
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config)
-    : spi_(createBusConfig(config))
-{
-    if (activeDisplay != nullptr) {
-        throw ColorDisplayError("A lvgl display is already active");
-    }
-    activeDisplay = this;
+ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config) {
+    spi_ = std::make_unique<color_display::SpiBus>(createBusConfig(config));
 
     using namespace color_display;
     lcd_init_cmd_t ili_init_cmds[]={
@@ -80,27 +71,21 @@ ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config)
         cmd++;
     }
 
-    lv_init();
 
-    static lv_disp_drv_t disp;
-    lv_disp_drv_init(&disp);
-    disp.disp_flush = flushCurrent;
-    disp.disp_fill = fillCurrent;
-    lv_disp_drv_register(&disp);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 void ColorDisplay::sendCommand(uint8_t cmd) {
     colorsSent_ = false;
-    spi_.sendCommand(cmd);
+    spi_->sendCommand(cmd);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 void ColorDisplay::sendData(const uint8_t* data , uint16_t length) {
     colorsSent_ = true;
-    spi_.sendData(data, length);
+    spi_->sendData(data, length);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -108,7 +93,7 @@ void ColorDisplay::sendData(const uint8_t* data , uint16_t length) {
 void ColorDisplay::sendColors(const lv_color_t* data, uint16_t length) {
     colorsSent_ = true;
     auto dataPtr = reinterpret_cast<const uint8_t*>(data);
-    spi_.sendData(dataPtr, sizeof(lv_color_t) * length);
+    spi_->sendData(dataPtr, sizeof(lv_color_t) * length);
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -146,14 +131,6 @@ void ColorDisplay::fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void ColorDisplay::flushCurrent(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t* colorMap) {
-    if (activeDisplay != nullptr) {
-        activeDisplay->flush(x1, y1, x2, y2, colorMap);
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 void ColorDisplay::setDrawWindow(int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
     uint8_t data[4];
 
@@ -176,35 +153,30 @@ void ColorDisplay::setDrawWindow(int32_t x1, int32_t y1, int32_t x2, int32_t y2)
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void ColorDisplay::fillCurrent(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color) {
-    if (activeDisplay != nullptr) {
-        activeDisplay->fillCurrent(x1, y1, x2, y2, color);
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 color_display::SpiBusConfig ColorDisplay::createBusConfig(const color_display::ColorDisplayConfig &config) {
+    auto colorSentWrapper = [this]{
+        if (colorsSent_ && colorsSentHandler_) {
+            colorsSentHandler_();
+        }
+    };
+
     return color_display::SpiBusConfig {
             .clockPin = config.clockPin,
             .dataPin  = config.dataPin,
             .chipSelectPin = config.chipSelectPin,
             .commandPin = config.commandPin,
             .dataReadPin = config.dataReadPin,
-            .transmissionEndHandler = handleEndTransmission,
+            .transmissionEndHandler = colorSentWrapper,
             .maxTransfertSize = LV_VDB_SIZE * 4,
     };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void ColorDisplay::handleEndTransmission() {
-    if(activeDisplay->colorsSent_) {
-//        lv_flush_ready();
-    };
+void ColorDisplay::setColorsSentHandler(const std::function<void()>& handler) {
+    colorsSentHandler_ = handler;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-} // namespace mfl
-
+}

@@ -114,7 +114,7 @@ void SpiBus::sendRaw(const uint8_t *data, uint16_t length) {
 
 void SpiBus::handleTransmissionEnd() {
     transferInProgress_ = false;
-    if (transmissionEndHandler_ != nullptr) {
+    if (transmissionEndHandler_) {
         transmissionEndHandler_();
     }
 }
