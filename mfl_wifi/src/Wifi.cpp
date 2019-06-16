@@ -36,11 +36,11 @@ Wifi::Wifi(const std::string& hostname, const std::string& ssid, const std::stri
 // ---------------------------------------------------------------------------------------------------------------------
 
 esp_err_t Wifi::eventHandler(void *ctx, system_event_t *event) {
-	if (activeWifi == 0) {
-		return ESP_FAIL;
-	}
-
 	mdns_handle_system_event(ctx, event);
+
+    if (activeWifi == nullptr) {
+        return ESP_FAIL;
+    }
 
 	switch (event->event_id) {
 	case SYSTEM_EVENT_STA_GOT_IP: {
@@ -72,10 +72,10 @@ esp_err_t Wifi::eventHandler(void *ctx, system_event_t *event) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-esp_err_t Wifi::addService(const std::string& type, Protocol protocol, uint16_t port, const std::string& name, const std::map<std::string, std::string>& props) {
+void Wifi::addService(const std::string& type, Protocol protocol, uint16_t port, const std::string& name, const std::map<std::string, std::string>& props) {
 	const char* protoStr = protocol == Protocol::tcp ? "_tcp" : "_udp";
 	std::vector<mdns_txt_item_t> propVector;
-	for (auto elem: props) {
+	for (const auto& elem: props) {
 		propVector.push_back(mdns_txt_item_t{
 			const_cast<char*>(elem.first.c_str()),
 			const_cast<char*>(elem.second.c_str())
@@ -83,22 +83,21 @@ esp_err_t Wifi::addService(const std::string& type, Protocol protocol, uint16_t 
 	}
 	const char* namePtr = name.empty() ? 0 : name.c_str();
 
-	return mdns_service_add(namePtr, type.c_str(),protoStr, port, propVector.data(), propVector.size());
+	ESP_ERROR_CHECK(mdns_service_add(namePtr, type.c_str(),protoStr, port, propVector.data(), propVector.size()));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-esp_err_t Wifi::start(const IpHandler& onIp, const FailHandler& onFail) {
+void Wifi::start(const IpHandler& onIp, const FailHandler& onFail) {
 	// this is not thread safe
     if (activeWifi != 0) {
-		ESP_LOGD(tag, "another WIFI is currently active");
-		return ESP_FAIL;
+		throw WifiError("another WIFI is currently active");
 	}
 	activeWifi = this;
 	onIp_ = onIp;
 	onFail_ = onFail;
 
-	ESP_ERROR_CHECK(esp_event_loop_init(eventHandler, NULL));
+	ESP_ERROR_CHECK(esp_event_loop_init(eventHandler, nullptr));
 
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -130,7 +129,6 @@ esp_err_t Wifi::start(const IpHandler& onIp, const FailHandler& onFail) {
 
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifiConfig));
 	ESP_ERROR_CHECK(esp_wifi_start());
-	return 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
