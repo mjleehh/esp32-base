@@ -32,7 +32,7 @@ SpiBus::SpiBus(const SpiBusConfig& config)
         throw SpiBusConfigError("clock pin is required in SPI config");
     }
 
-    if (config.dataPin == UNDEFINED_PIN) {
+    if (config.dataFromMasterPin == UNDEFINED_PIN) {
         throw SpiBusConfigError("data pin is required in SPI config");
     }
 
@@ -60,8 +60,8 @@ SpiBus::SpiBus(const SpiBusConfig& config)
         throw std::invalid_argument("not implemented");
     } else {
         spi_bus_config_t buscfg = {
-                .mosi_io_num = config.dataPin,
-                .miso_io_num = -1,
+                .mosi_io_num = config.dataFromMasterPin,
+                .miso_io_num = config.dataToMasterPin,
                 .sclk_io_num = config.clockPin,
                 .quadwp_io_num = -1,
                 .quadhd_io_num = -1,

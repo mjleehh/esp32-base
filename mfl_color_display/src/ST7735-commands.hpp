@@ -43,13 +43,31 @@ enum St7735Commands {
     FRMCTR2    = 0xB2, // idle/8 color mode display control
     FRMCTR3    = 0xB3, // partial mode/full color display control
 
+    DISCTRL    = 0xb6, // display function control
+
     PWCTR1     = 0xC0, // GVDD voltage
     PWCTR2     = 0xC1, // VGH and VGL supply voltages
     PWCTR3     = 0xC2, // normal mode operation amp level
+    PWCTR4     = 0xc3, //
+    PWCTR5     = 0xc4, //
+
+    VMCTR1     = 0xc5, //
+    VMCTR2     = 0xc7, //
+
+    POWERA     = 0xCB, // power control A
+    POWERB     = 0xCF, // power control B
 
     RDID1      = 0xDA, // read ID 1
     RDID2      = 0xDB, // read ID 2
     RDID3      = 0xDC, // read ID 3
+
+    DTCA       = 0xe8, // driver timing control A
+    DTCB       = 0xea, // driver timing control B
+    POWER_SEQ  = 0xed, // power on sequence control
+
+    PRC        = 0xf7, // pump ratio control
+
+
 };
 
 enum MomryAccessParams {

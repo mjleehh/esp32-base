@@ -9,7 +9,7 @@ namespace mfl::color_display {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const gpio_num_t UNDEFINED_PIN = GPIO_NUM_MAX;
+const gpio_num_t UNDEFINED_PIN = GPIO_NUM_NC;
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -20,11 +20,12 @@ struct SpiBusConfigError : std::invalid_argument {
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct SpiBusConfig {
-    gpio_num_t clockPin = UNDEFINED_PIN;
-    gpio_num_t dataPin = UNDEFINED_PIN;
-    gpio_num_t chipSelectPin = UNDEFINED_PIN;
-    gpio_num_t commandPin = UNDEFINED_PIN;
-    gpio_num_t dataReadPin = UNDEFINED_PIN;
+    gpio_num_t clockPin          = UNDEFINED_PIN;
+    gpio_num_t dataFromMasterPin = UNDEFINED_PIN;
+    gpio_num_t dataToMasterPin   = UNDEFINED_PIN;
+    gpio_num_t chipSelectPin     = UNDEFINED_PIN;
+    gpio_num_t commandPin        = UNDEFINED_PIN;
+    gpio_num_t dataReadPin       = UNDEFINED_PIN;
     std::function<void()> transmissionEndHandler = nullptr;
     uint16_t maxTransfertSize = 0;
 };

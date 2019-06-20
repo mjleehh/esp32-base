@@ -1,55 +1,19 @@
 #include "mfl/ColorDisplay.hpp"
-
+#include "ColorDisplay_Internal.hpp"
 #include "ST7735-commands.hpp"
+#include "ILI9341_controller.hpp"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-
-#include <driver/spi_master.h>
-#include <lv_conf.h>
 #include <esp_log.h>
-#include <lvgl/lvgl.h>
 
 
 namespace mfl {
-
-namespace {
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-typedef struct {
-    uint8_t cmd;
-    uint8_t data[16];
-    uint8_t databytes; //No of data in data; bit 7 = delay after set; 0xFF = end of cmds.
-    uint16_t delay;
-} lcd_init_cmd_t;
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-const char tag[] = "color display";
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-} // namespace anonymous
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config) {
     spi_ = std::make_unique<color_display::SpiBus>(createBusConfig(config));
-
-    using namespace color_display;
-    lcd_init_cmd_t ili_init_cmds[]={
-            {SWRESET, {},    0, 200}, // reset
-            {SLPOUT, {},     0, 500}, // wake
-            {COLMOD, {0x55}, 1, 50}, // 16 bit color mode
-            {MADCTL, {MADCTL_MX | MADCTL_MY},    1, 50}, // memory access data control
-            {CASET, {0x00, 0x00, 0x00, 0xEF}, 4, 0},
-            {RASET, {0x00, 0x00, 0x00, 0xEF}, 4, 0},
-            //{RAMWR, {}, 0},
-            {NORON, {}, 0, 200},
-            {DISPON, {}, 0, 200},
-            {0, {}, 0xff, 0},
-    };
 
     gpio_set_direction(config.resetPin, GPIO_MODE_OUTPUT);
 
@@ -59,19 +23,15 @@ ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config) {
     gpio_set_level(config.resetPin, 1);
     vTaskDelay(100 / portTICK_RATE_MS);
 
-    // send setup sequence
-    uint16_t cmd = 0;
-    while (ili_init_cmds[cmd].databytes != 0xff) {
-        sendCommand(ili_init_cmds[cmd].cmd);
-        sendData(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes);
-        auto delay = ili_init_cmds[cmd].delay;
-        if (delay > 0) {
-            vTaskDelay(delay / portTICK_RATE_MS);
-        }
-        cmd++;
+    Internal internal(*this);
+    color_display::init_ILI9341_controller(internal);
+
+    if (config.backlightPin != color_display::UNDEFINED_PIN) {
+        // hack hack
+        ESP_LOGI(TAG, "turning on display at %i", config.backlightPin);
+        gpio_set_direction(config.backlightPin, GPIO_MODE_OUTPUT);
+        gpio_set_level(config.backlightPin, 0);
     }
-
-
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -162,7 +122,8 @@ color_display::SpiBusConfig ColorDisplay::createBusConfig(const color_display::C
 
     return color_display::SpiBusConfig {
             .clockPin = config.clockPin,
-            .dataPin  = config.dataPin,
+            .dataFromMasterPin = config.dataPin,
+            .dataToMasterPin   = config.dataFromDisplayPin,
             .chipSelectPin = config.chipSelectPin,
             .commandPin = config.commandPin,
             .dataReadPin = config.dataReadPin,
