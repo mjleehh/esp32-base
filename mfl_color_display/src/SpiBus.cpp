@@ -21,7 +21,7 @@ SpiBus* currentBus = nullptr;
 // ---------------------------------------------------------------------------------------------------------------------
 
 SpiBus::SpiBus(const SpiBusConfig& config)
-    : commandPin_(config.commandPin), transmissionEndHandler_(config.transmissionEndHandler), transferInProgress_(false)
+    : commandPin_(config.commandPin), transmissionEndHandler_(config.transmissionEndHandler)
 {
     if (currentBus != nullptr) {
         throw SpiBusConfigError("due to a bug in ESP IDF currently there can only be one SPI bus connected");
@@ -52,7 +52,7 @@ SpiBus::SpiBus(const SpiBusConfig& config)
             .flags = SPI_DEVICE_HALFDUPLEX,
             .queue_size = 1,
             .pre_cb = nullptr,
-            .post_cb = transmissionEndIsr,
+            .post_cb = nullptr,
     };
 
     // check if we have 3 wire transfer
@@ -92,13 +92,11 @@ void SpiBus::sendData(const uint8_t *data, uint16_t length) {
     sendRaw(data, length);
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+
 void SpiBus::sendRaw(const uint8_t *data, uint16_t length) {
     if (length == 0) {
         return;
-    }
-
-    while (transferInProgress_) {
-        // waiting
     }
 
     spi_transaction_t transaction = {
@@ -106,31 +104,8 @@ void SpiBus::sendRaw(const uint8_t *data, uint16_t length) {
         .user = this,
         .tx_buffer = data,
     };
-    transferInProgress_ = true;
-    spi_device_queue_trans(spi_, &transaction, portMAX_DELAY);
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void SpiBus::handleTransmissionEnd() {
-    transferInProgress_ = false;
-    if (transmissionEndHandler_) {
-        transmissionEndHandler_();
-    }
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-void IRAM_ATTR SpiBus::transmissionEndIsr(spi_transaction_t *transaction) {
-// FIXME: the user property gets corrupted for some reason
-// FIXME: terrible terrible hack
-//    volatile auto user = reinterpret_cast<SpiBus*>(transaction->user);
-//    if (user != nullptr) {
-//        user->handleTransmissionEnd();
-//    }
-    if (currentBus != nullptr) {
-        currentBus->handleTransmissionEnd();
-    }
+    ESP_ERROR_CHECK(spi_device_transmit(spi_, &transaction));
+    transmissionEndHandler_();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

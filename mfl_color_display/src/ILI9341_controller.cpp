@@ -23,7 +23,7 @@ void init_ILI9341_controller(ColorDisplay::Internal& display) {
         {PWCTR2, {0x10}, 1, 0},
         {VMCTR1, {0x3e, 0x28}, 2, 0},
         {VMCTR2, {0x86}, 1, 0},
-        {MADCTL, {MADCTL_MX | MADCTL_MY},    1, 50},
+        {MADCTL, {MADCTL_MV}, 1, 50},
         {COLMOD, {0x55}, 1, 0},
         {INVOFF, {}, 0, 0},
         {FRMCTR1, {0x00, 0x1b}, 2, 0},

@@ -28,9 +28,10 @@ ColorDisplay::ColorDisplay(const color_display::ColorDisplayConfig& config) {
 
     if (config.backlightPin != color_display::UNDEFINED_PIN) {
         // hack hack
+        auto level = config.backlightPinInverted ^ 1;
         ESP_LOGI(TAG, "turning on display at %i", config.backlightPin);
         gpio_set_direction(config.backlightPin, GPIO_MODE_OUTPUT);
-        gpio_set_level(config.backlightPin, 0);
+        gpio_set_level(config.backlightPin, level);
     }
 }
 
@@ -59,16 +60,19 @@ void ColorDisplay::sendColors(const lv_color_t* data, uint16_t length) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 void ColorDisplay::flush(int32_t x1, int32_t y1, int32_t x2, int32_t y2, const lv_color_t* colorMap) {
+    lock_.lock();
     setDrawWindow(x1, y1, x2, y2);
 
     uint32_t size = (x2 - x1 + 1) * (y2 - y1 + 1);
     sendCommand(color_display::RAMWR);
     sendColors(colorMap, size);
+    lock_.unlock();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 void ColorDisplay::fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color_t color) {
+    lock_.lock();
     setDrawWindow(x1, y1, x2, y2);
 
     uint32_t size = (x2 - x1 + 1) * (y2 - y1 + 1);
@@ -87,6 +91,7 @@ void ColorDisplay::fill(int32_t x1, int32_t y1, int32_t x2, int32_t y2, lv_color
         size -= LV_HOR_RES;
     }
     sendColors(buf, size);
+    lock_.unlock();
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

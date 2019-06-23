@@ -40,13 +40,10 @@ struct SpiBus {
 
 private:
     void sendRaw(const uint8_t* data, uint16_t length);
-    void handleTransmissionEnd();
-    static void transmissionEndIsr(spi_transaction_t *transaction);
 
     spi_device_handle_t spi_;
     gpio_num_t commandPin_;
     std::function<void()> transmissionEndHandler_;
-    volatile bool transferInProgress_;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

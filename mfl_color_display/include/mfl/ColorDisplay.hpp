@@ -6,6 +6,7 @@
 #include <mfl/color_display/SpiBus.hpp>
 #include <mfl/color_display/ColorDisplayConfig.hpp>
 #include <memory>
+#include <mutex>
 
 namespace mfl {
 
@@ -38,6 +39,7 @@ private:
     std::function<void()> colorsSentHandler_;
     std::unique_ptr<color_display::SpiBus> spi_;
     volatile bool colorsSent_;
+    std::mutex lock_;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
