@@ -1,0 +1,18 @@
+menu "AP example"
+    config AP_NAME
+        string "access point name"
+        default "esp32exampleAP"
+        help
+            the SSID of the access point the ESP32 will create
+    config AP_KEY
+        string "access point key"
+        default "VerySecret123"
+        help
+            the key for the access point the ESP32 will create
+
+    config DEVICE_HOSTNAME
+        string "hostname"
+        default "yourESP32"
+        help
+            the hostname of the ESP32 on the network
+endmenu
