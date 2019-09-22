@@ -1,0 +1,18 @@
+menu "display example"
+    config DISPLAY_CLOCK_PIN
+        int "clock pin"
+        default 15
+        help
+            I2C clock pin of display bus
+    config DISPLAY_DATA_PIN
+        int "data pin"
+        default 4
+        help
+            I2C data pin of display bus
+
+    config DISPLAY_RESET_PIN
+        int "reset pin"
+        default 16
+        help
+            pin connected to reset port of display controller
+endmenu
