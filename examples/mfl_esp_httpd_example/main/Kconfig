@@ -1,0 +1,18 @@
+menu "WiFi example"
+    config WIFI_SSID
+        string "wifi name"
+        default "SomeWifi"
+        help
+            the SSID of the wifi the ESP32 will connect to
+    config WIFI_KEY
+        string "wifi key"
+        default "VerySecret123"
+        help
+            the key for the wifi the ESP32 will connect to
+
+    config DEVICE_HOSTNAME
+        string "hostname"
+        default "yourESP32"
+        help
+            the hostname of the ESP32 on the network
+endmenu

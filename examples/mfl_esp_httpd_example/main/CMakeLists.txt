@@ -1,0 +1,1 @@
+idf_component_register(SRCS "main.cpp" INCLUDE_DIRS "." REQUIRES "mfl_wifi mfl_esp_httpd nvs_flash")
