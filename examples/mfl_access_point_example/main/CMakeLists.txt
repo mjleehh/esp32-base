@@ -1,1 +1,1 @@
-idf_component_register(SRCS "main.cpp" INCLUDE_DIRS "." REQUIRES "mfl_access_point")
+idf_component_register(SRCS "main.cpp" INCLUDE_DIRS "." REQUIRES "mfl_access_point nvs_flash")
