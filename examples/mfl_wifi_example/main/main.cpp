@@ -1,5 +1,6 @@
 #include <freertos/portmacro.h>
 #include <esp_log.h>
+#include <nvs_flash.h>
 
 #include <mfl/Wifi.hpp>
 #include <sdkconfig.h>
@@ -7,6 +8,9 @@
 const char* tag = "main";
 
 extern "C" void app_main() {
+    nvs_flash_init();
+    tcpip_adapter_init();
+
     mfl::Wifi wifi(CONFIG_DEVICE_HOSTNAME, CONFIG_WIFI_SSID, CONFIG_WIFI_KEY);
     wifi.start([](const ip4_addr& addr){
         ip4_addr ip = addr;
