@@ -1,6 +1,5 @@
 #pragma once
 
-#include <lwip/ip_addr.h>
 #include <esp_event.h>
 #include <esp_err.h>
 
@@ -20,7 +19,7 @@ struct WifiError : std::logic_error {
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct Wifi {
-    using IpHandler =  std::function<void(const ip4_addr&)>;
+    using IpHandler =  std::function<void(const esp_ip4_addr&)>;
     using FailHandler = std::function<void()>;
     using Bssid = std::vector<uint8_t>;
 
