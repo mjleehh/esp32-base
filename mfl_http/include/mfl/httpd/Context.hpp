@@ -2,14 +2,9 @@
 
 #include <mfl/httpd/Response.hpp>
 #include <mfl/http/Method.hpp>
-
-#include <map>
+#include <mfl/httpd/Params.hpp>
 
 namespace mfl::httpd {
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-using Params = std::map<std::string, std::string>;
 
 // ---------------------------------------------------------------------------------------------------------------------
 

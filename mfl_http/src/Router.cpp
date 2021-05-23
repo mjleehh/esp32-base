@@ -90,7 +90,7 @@ void Router::handle(Context<std::string>& context) const {
 
     MFL_HELPERS_DEFER({
         if (handlerNode && handlerNode->hasHandler(context.method)) {
-            context.params = std::move(argValues);
+            context.params.reset(std::move(argValues));
             handlerNode->handlerFromMethod(context.method)(context);
         } else {
             context.res.status = Status::notFound;
