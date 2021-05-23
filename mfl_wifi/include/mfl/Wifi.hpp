@@ -38,7 +38,7 @@ struct Wifi {
     void start(const IpHandler& onIp, const FailHandler& onFail = FailHandler());
 
 private:
-    static esp_err_t eventHandler(void *ctx, system_event_t *event);
+    static void eventHandler(void*, esp_event_base_t eventBase, int32_t eventId, void* eventData);
     static Wifi* activeWifi;
 
     IpHandler onIp_;
