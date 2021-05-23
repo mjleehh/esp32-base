@@ -59,7 +59,7 @@ uint8_t Display::byteCb(u8x8_t *handle, uint8_t msg, uint8_t arg_int, void *arg_
         case U8X8_MSG_BYTE_INIT: {
             ESP_LOGI(tag, "setting up I2C for display");
 
-            i2c_config_t conf;
+            i2c_config_t conf = {};
             conf.mode = I2C_MODE_MASTER;
             ESP_LOGD(tag, "sda_io_num %d", display->dataPin_);
             conf.sda_io_num = display->dataPin_;
