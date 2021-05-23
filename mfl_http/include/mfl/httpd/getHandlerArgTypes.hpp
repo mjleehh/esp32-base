@@ -55,6 +55,9 @@ struct getHandlerFunctionTypeArgs<F, false> : getFunctorTypeArgs<F> {};
 
 // =====================================================================================================================
 
+/**
+ * determine arguments and return type of a callable
+ */
 template<class F>
 struct getHandlerArgTypes
         : getHandlerFunctionTypeArgs<F, std::is_function<typename std::remove_pointer<F>::type>::value> {};

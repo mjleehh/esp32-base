@@ -45,13 +45,16 @@ private:
         addPlainHandler(method, uriTemplate, [handler](Context<std::string>& c){
             using RequestBodyT = typename getHandlerArgTypes<F>::request_body_type;
             using ResponseBodyT = typename getHandlerArgTypes<F>::response_body_type;
-            auto body = http::response_types::deserialize<RequestBodyT>(c.body);
+            using ActualInT = typename Context<RequestBodyT, ResponseBodyT>::ActualInT;
+            using ActualOutT = typename Context<RequestBodyT, ResponseBodyT>::ActualOutT;
+
+            auto body = http::response_types::deserialize<ActualInT>(c.body);
             Context<RequestBodyT, ResponseBodyT> newC;
             newC.method = c.method;
             newC.uri = c.uri;
             newC.body = body;
             handler(newC);
-            c.res.body = http::response_types::serialize<ResponseBodyT>(newC.res.body);
+            c.res.body = http::response_types::serialize<ActualOutT>(newC.res.body);
         });
     }
 
