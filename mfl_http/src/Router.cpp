@@ -91,7 +91,16 @@ void Router::handle(Context<std::string>& context) const {
     MFL_HELPERS_DEFER({
         if (handlerNode && handlerNode->hasHandler(context.method)) {
             context.params.reset(std::move(argValues));
-            handlerNode->handlerFromMethod(context.method)(context);
+            try {
+                handlerNode->handlerFromMethod(context.method)(context);
+                context.res.status = Status::ok;
+            } catch (const std::exception &e) {
+                ESP_LOGE(tag, "endpoint threw an error: %s", e.what());
+                context.res.status = Status::internalServerError;
+            } catch(...) {
+                ESP_LOGE(tag, "endpoint threw an unknown exception");
+                context.res.status = Status::internalServerError;
+            }
         } else {
             context.res.status = Status::notFound;
         }
