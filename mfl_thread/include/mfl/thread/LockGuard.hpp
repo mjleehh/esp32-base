@@ -21,8 +21,8 @@ struct ReleaseUnownedLock : std::runtime_error {
 // ---------------------------------------------------------------------------------------------------------------------
 
 struct LockGuard {
-    LockGuard(SemaphoreHandle_t handle, uint millis = 10000u): handle_(nullptr) {
-        auto res = xSemaphoreTake(handle, 10000);
+    LockGuard(SemaphoreHandle_t handle, uint millis = 1000u): handle_(nullptr) {
+        auto res = xSemaphoreTake(handle, millis);
         if(!res) {
             throw LockTimeout();
         }
