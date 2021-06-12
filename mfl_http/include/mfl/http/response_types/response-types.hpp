@@ -28,18 +28,11 @@ inline std::string serialize(const std::string& resBody) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-template<>
-inline std::string serialize(std::string& resBody) {
-    return resBody;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
 /**
  * this is the placeholder for void output type (handlers with no result)
  */
 template<>
-inline std::string serialize(nullptr_t&) {
+inline std::string serialize(const nullptr_t&) {
     return "";
 }
 

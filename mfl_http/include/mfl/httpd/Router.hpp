@@ -55,7 +55,7 @@ private:
             newC.params = c.params;
             newC.body = body;
             handler(newC);
-            c.res.body = http::response_types::serialize<ActualOutT>(newC.res.body);
+            c.res.body = http::response_types::serialize<const ActualOutT>(newC.res.body);
         });
     }
 
