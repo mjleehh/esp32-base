@@ -21,6 +21,8 @@ struct Display {
 
     Display(ControllerType controllerType, gpio_num_t clockPin, gpio_num_t dataPin, gpio_num_t reset = UNDEFINED_PIN, gpio_num_t dc = UNDEFINED_PIN);
 
+    void start();
+
     /**
      * Get the raw U8G2 display library handle.
      */

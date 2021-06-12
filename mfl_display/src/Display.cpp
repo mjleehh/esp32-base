@@ -27,6 +27,11 @@ const unsigned int I2C_TIMEOUT_MS = 1000;
 Display::Display(ControllerType controllerType, gpio_num_t clockPin, gpio_num_t dataPin, gpio_num_t resetPin, gpio_num_t dcPin)
         : clockPin_(clockPin), dataPin_(dataPin), reset_(resetPin), dc_(dcPin), i2cHandle_(0) {
 
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void Display::start() {
     u8g2_Setup_ssd1306_i2c_128x64_noname_f(
             &handle_,
             U8G2_R0,
@@ -39,8 +44,6 @@ Display::Display(ControllerType controllerType, gpio_num_t clockPin, gpio_num_t 
 
     ESP_LOGI(tag, "u8g2_SetPowerSave");
     u8g2_SetPowerSave((u8g2_t *) this, 0); // wake up display
-
-
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
