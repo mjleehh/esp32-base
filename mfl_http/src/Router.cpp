@@ -41,7 +41,7 @@ Router::Router()
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void Router::addPlainHandler(http::Method method, const std::string& uriTemplate, const Handler<std::string>& handler) {
+void Router::addHandlerWrapper(http::Method method, const std::string& uriTemplate, const HandlerWrapper& handlerWrapper) {
     auto uri = splitUrl(uriTemplate);
 
     auto *node = &root_;
@@ -75,13 +75,13 @@ void Router::addPlainHandler(http::Method method, const std::string& uriTemplate
     if (node->hasHandler(method)) {
         throw EndpointError("handler already defined for node %s");
     }
-    node->setHandler(method, handler);
+    node->setHandler(method, handlerWrapper);
     ESP_LOGI(tag, "added URI handler for %s", uriTemplate.c_str());
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void Router::handle(Context<std::string>& context) const {
+void Router::handle(WrapperContext& context) const {
     auto uri = splitUrl(context.uri);
     const auto* node = &root_;
 

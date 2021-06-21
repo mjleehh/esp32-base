@@ -152,17 +152,18 @@ void EspHttpd::start() {
 
 esp_err_t EspHttpd::genericHandler(httpd_req_t *req) {
     try {
-        httpd::Context<std::string> context;
-        context.uri = req->uri;
-        context.body = readBody(req);
-        context.method = methodFromRequest(req->method);
+        httpd::WrapperContext wrapperContext;
+        wrapperContext.uri = req->uri;
+        wrapperContext.body = readBody(req);
+        wrapperContext.method = methodFromRequest(req->method);
 
         if (activeServer != nullptr) {
-            activeServer->router_.handle(context);
+            activeServer->router_.handle(wrapperContext);
         }
 
-        httpd_resp_set_status(req, responseCodeStrings(context.res.status));
-        const auto& res = context.res;
+        httpd_resp_set_type(req, wrapperContext.res.returnType.c_str());
+        httpd_resp_set_status(req, responseCodeStrings(wrapperContext.res.status));
+        const auto& res = wrapperContext.res;
         httpd_resp_send(req, res.body.data(), res.body.length());
         return ESP_OK;
     } catch (const std::exception& e) {

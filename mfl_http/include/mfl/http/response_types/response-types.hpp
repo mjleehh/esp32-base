@@ -16,6 +16,13 @@ inline std::string getMimeType<std::string>() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+template<>
+inline std::string getMimeType<nullptr_t>() {
+    return "text/plain";
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 template<typename T>
 std::string serialize(T& resBody);
 

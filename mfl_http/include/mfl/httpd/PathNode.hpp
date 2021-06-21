@@ -13,16 +13,16 @@ namespace mfl::httpd {
 struct PathNode {
     PathNode(std::vector<std::string>&& args);
 
-    Handler<std::string>& handlerFromMethod(http::Method method);
-    const Handler<std::string>& handlerFromMethod(http::Method method) const;
+    HandlerWrapper& handlerFromMethod(http::Method method);
+    const HandlerWrapper& handlerFromMethod(http::Method method) const;
 
     bool hasHandler(http::Method method) const;
-    void setHandler(http::Method method, const Handler<std::string>& handler);
+    void setHandler(http::Method method, const HandlerWrapper& handler);
 
-    Handler<std::string> post;
-    Handler<std::string> get;
-    Handler<std::string> put;
-    Handler<std::string> del;
+    HandlerWrapper post;
+    HandlerWrapper get;
+    HandlerWrapper put;
+    HandlerWrapper del;
     std::vector<std::string> args;
     std::map<std::string, PathNode> children;
 };

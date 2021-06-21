@@ -12,7 +12,9 @@ namespace mfl::httpd {
 // ---------------------------------------------------------------------------------------------------------------------
 
 template<typename InT, typename OutT = InT>
-using Handler = std::function<void(Context<InT, OutT>& ctx)>;
+using Handler = std::function<void(Context<InT, OutT>& c)>;
+
+using HandlerWrapper = std::function<void(WrapperContext& c)>;
 
 // ---------------------------------------------------------------------------------------------------------------------
 

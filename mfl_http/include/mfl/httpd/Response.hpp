@@ -15,11 +15,20 @@ enum class Status {
 
 template<typename T>
 struct Response {
-    Response() : status(Status::ok), returnType("text/plain") {}
+    Response() : status(Status::ok) {}
+
+    Status status;
+    T body;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+struct WrapperResponse {
+    WrapperResponse() : status(Status::ok), returnType("text/plain") {}
 
     Status status;
     std::string returnType;
-    T body;
+    std::string body;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

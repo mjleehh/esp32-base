@@ -25,12 +25,23 @@ struct Context {
     using ActualInT = typename replaceVoidWithPlaceholder<InT>::type;
     using ActualOutT = typename replaceVoidWithPlaceholder<OutT>::type;
 
-    http::Method method;
-    std::string uri;
+    Context(Params&& params, ActualInT&& body): params(params), body(body) {}
+
     Params params;
 
     ActualInT body;
     Response<ActualOutT> res;
+};
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+struct WrapperContext {
+    http::Method method;
+    std::string uri;
+
+    Params params;
+    std::string body;
+    WrapperResponse res;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------

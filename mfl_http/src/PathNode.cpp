@@ -21,7 +21,7 @@ PathNode::PathNode(std::vector<std::string> &&args) : args(args) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-Handler<std::string>& PathNode::handlerFromMethod(http::Method method) {
+HandlerWrapper& PathNode::handlerFromMethod(http::Method method) {
     switch (method) {
         case http::Method::post:
             return post;
@@ -40,7 +40,7 @@ Handler<std::string>& PathNode::handlerFromMethod(http::Method method) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-const Handler<std::string> &PathNode::handlerFromMethod(http::Method method) const {
+const HandlerWrapper& PathNode::handlerFromMethod(http::Method method) const {
     switch (method) {
         case http::Method::post:
             return post;
@@ -64,7 +64,7 @@ bool PathNode::hasHandler(http::Method method) const {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-void PathNode::setHandler(http::Method method, const Handler<std::string> &handler) {
+void PathNode::setHandler(http::Method method, const HandlerWrapper& handler) {
     handlerFromMethod(method) = handler;
 }
 
